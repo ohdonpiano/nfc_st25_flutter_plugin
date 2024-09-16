@@ -110,6 +110,16 @@ class _ExamplePage extends State<ExamplePage> {
     }
   }
 
+  Future<void> readBlock() async {
+    final index = 0;
+    try {
+      final data = await NfcSt25.readBlock(index);
+      log("READ BLOCK (" + data.length.toString() + ") : " + data.toString());
+    } catch (e) {
+      log("failed read block index $index -> " + e.toString());
+    }
+  }
+
   Future<void> readMailBoxMsg() async {
     int cntError = 0;
     Uint8List msg = Uint8List.fromList([]);
@@ -360,7 +370,7 @@ class _ExamplePage extends State<ExamplePage> {
                                     ),
                                 ElevatedButton(
                                     child: Text("Read"),
-                                    onPressed: () => readMailBoxMsg()),
+                                    onPressed: () => readBlock()),
                                 ElevatedButton(
                                     child: Text("Write"),
                                     onPressed: () => showWriteDialog(

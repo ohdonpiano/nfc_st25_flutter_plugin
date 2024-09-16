@@ -29,6 +29,13 @@ class NfcSt25 {
     return msg;
   }
 
+  static Future<Uint8List> readBlock(int index) async {
+    final Uint8List ris = await _channel
+        .invokeMethod('readBlock', index)
+        .catchError((e) => throw (_mapException(e)));
+    return ris;
+  }
+
   static Future<String> resetMailBox() async {
     final String ris = await _channel
         .invokeMethod('resetMailbox')

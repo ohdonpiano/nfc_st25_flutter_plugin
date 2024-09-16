@@ -44,6 +44,22 @@ class NfcSt25 {
     return ris;
   }
 
+  static Future<void> presentPassword(
+      int passwordNumber, List<int> password) async {
+    await _channel.invokeMethod('presentPassword', {
+      "passwordNumber": passwordNumber,
+      "password": password
+    }).catchError((e) => throw (_mapException(e)));
+  }
+
+  static Future<void> writePassword(
+      int passwordNumber, List<int> password) async {
+    await _channel.invokeMethod('writePassword', {
+      "passwordNumber": passwordNumber,
+      "password": password
+    }).catchError((e) => throw (_mapException(e)));
+  }
+
   static Future<String> resetMailBox() async {
     final String ris = await _channel
         .invokeMethod('resetMailbox')
@@ -146,7 +162,6 @@ Exception _mapException(dynamic error) {
       case "ACTION_FAILED":
         error = NfcActionFailedException(error.message ?? "");
         break;
-
       default:
         error = NfcGeneralException(error.message ?? "");
     }

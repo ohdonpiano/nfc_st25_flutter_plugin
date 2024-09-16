@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:nfc_st25/nfc_st25.dart';
 import 'package:nfc_st25/utils/nfc_st25_tag.dart';
 
+import 'hex.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -30,6 +32,13 @@ class ExamplePage extends StatefulWidget {
 
 class ExamplePageState extends State<ExamplePage> {
   final _scrollController = ScrollController();
+  final passwordControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
+  final addressController = TextEditingController();
+  final blockNumberController = TextEditingController();
   bool nfcAvailability = false;
   St25Tag? lastTag;
   bool loading = false;
@@ -54,6 +63,12 @@ class ExamplePageState extends State<ExamplePage> {
             nfcAvailability = value;
           })
         });
+    for (TextEditingController controller in passwordControllers) {
+      controller.text =
+          arrayToHex(Uint8List.fromList([0, 0, 0, 0, 0, 0, 0, 0]));
+    }
+    addressController.text = "0200";
+    blockNumberController.text = "64";
     startListen();
   }
 
@@ -114,23 +129,60 @@ class ExamplePageState extends State<ExamplePage> {
   }
 
   Future<void> readBlock() async {
-    const index = 0;
+    final address = int.tryParse(addressController.text.trim());
+    if (address == null) {
+      return;
+    }
     try {
-      final data = await NfcSt25.readBlock(index);
-      log("READ BLOCK (${data.length}) : $data");
+      final data = await NfcSt25.readBlock(address);
+      log("read block (${data.length}) : $data");
     } catch (e) {
-      log("failed read block index $index -> $e");
+      log("failed read block index $address -> $e");
     }
   }
 
   Future<void> readMultipleBlocks() async {
-    const index = 0;
-    const blocks = 30;
+    final address = int.tryParse(addressController.text.trim());
+    if (address == null) {
+      return;
+    }
+    final numBlocks = int.tryParse(blockNumberController.text.trim());
+    if (numBlocks == null) {
+      return;
+    }
     try {
-      final data = await NfcSt25.readBlocks(index, blocks);
-      log("READ BLOCKS (${data.length}) : $data");
+      final data = await NfcSt25.readBlocks(address, numBlocks);
+      log("read multiple blocks (${data.length}) : $data");
     } catch (e) {
       log("failed read blocks -> $e");
+    }
+  }
+
+  Future<void> presentPassword(int passwordNumber, String password) async {
+    if (password.length != 16) {
+      showSnackBar(
+          "Invalid password length: ${password.length}. Must be 64 bits", true);
+      return;
+    }
+    try {
+      await NfcSt25.presentPassword(passwordNumber, hexToUint8List(password));
+      log("password # $passwordNumber presented successfully");
+    } catch (e) {
+      log("failed to present password $passwordNumber -> $e");
+    }
+  }
+
+  Future<void> writePassword(int passwordNumber, String password) async {
+    if (password.length != 16) {
+      showSnackBar(
+          "Invalid password length: ${password.length}. Must be 64 bits", true);
+      return;
+    }
+    try {
+      await NfcSt25.writePassword(passwordNumber, password.codeUnits);
+      log("password # $passwordNumber written successfully");
+    } catch (e) {
+      log("failed to write password $passwordNumber -> $e");
     }
   }
 
@@ -229,7 +281,7 @@ class ExamplePageState extends State<ExamplePage> {
     }
   }
 
-  showSnackBar(String text, bool error) {
+  void showSnackBar(String text, bool error) {
     final snackBar = SnackBar(
       content: Text(text),
       backgroundColor: error ? Colors.red : null,
@@ -354,124 +406,173 @@ class ExamplePageState extends State<ExamplePage> {
         appBar: _myAppBar(),
         body: lastTag == null
             ? _tapCard()
-            : Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      height: 300,
-                      padding: const EdgeInsets.all(8),
+            : Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text("Description: ${lastTag!.description}"),
-                          Text("Memory size: ${lastTag!.memorySize}"),
-                          Text('Last mailbox msg read: $lastMsg'),
-                          const SizedBox(height: 25),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                ElevatedButton(
-                                    child: const Text("Write and read"),
-                                    onPressed: () => showWriteDialog(
-                                        true) //writeMailBoxMsg(),
-                                    ),
-                                ElevatedButton(
-                                    child: const Text("Read blocks"),
-                                    onPressed: () => readMultipleBlocks()),
-                                ElevatedButton(
-                                    child: const Text("Write"),
-                                    onPressed: () => showWriteDialog(
-                                        false) //writeMailBoxMsg(),
-                                    ),
-                              ]),
-                          ElevatedButton(
-                              child: const Text("Write NDEF"),
-                              onPressed: () => writeNDEF(
-                                  "Hello from flutter") //writeMailBoxMsg(),
-                              ),
-                          ElevatedButton(
-                              child: const Text("Read NDEF"),
-                              onPressed: () => readNDEF() //writeMailBoxMsg(),
-                              ),
+                          _buildCommands(),
+                          //_buildMailBox(),
+                          _buildLogs(),
                         ],
                       ),
                     ),
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                              color: Colors.blue,
-                              child: ListTile(
-                                title: const Text(
-                                  "MILBOX INFO",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.arrow_downward,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () => getMailBoxInfo(),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.restore,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () => resetMailBox(),
-                                      ),
-                                    ]),
-                              )),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            color: Colors.black12,
-                            child: Text(mailBoxInfo.toString()),
-                          ),
-                        ]),
-                    Container(
-                        color: Colors.blue,
-                        child: ListTile(
-                          //leading: Icon(Icons.code),
-                          title: const Text(
-                            "Logs",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          trailing: IconButton(
-                            onPressed: () => clearLogs(),
-                            icon: const Icon(
-                              Icons.clear,
-                              color: Colors.white,
-                            ),
-                          ),
-                        )),
-                    Expanded(
-                        child: Container(
-                      color: Colors.black12,
-                      child: ListView.builder(
-                        itemCount: logs.length,
-                        controller: _scrollController,
-                        itemBuilder: (BuildContext ctxt, int index) {
-                          return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(logs[index]),
-                                    const Divider()
-                                  ]));
-                        },
-                      ),
-                    ))
-                  ],
-                ),
+                  ),
+                ],
               ),
       ),
+    );
+  }
+
+  Widget _buildCommands() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text("Description: ${lastTag!.description}"),
+          Text("Memory size: ${lastTag!.memorySize}"),
+          Text('Last mailbox msg read: $lastMsg'),
+          const SizedBox(height: 25),
+          const Text("Read / Write blocks"),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(
+                    label: Text("Address hex - hex"), prefix: Text("0x")),
+                inputFormatters: [HexadecimalTextInputFormatter()],
+                controller: addressController,
+              ),
+            ),
+            Expanded(
+              child: TextFormField(
+                  decoration:
+                      const InputDecoration(label: Text("Block size to read")),
+                  inputFormatters: [IntegerTextInputFormatter()],
+                  controller: blockNumberController),
+            ),
+          ]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(
+                  child: const Text("Read block"),
+                  onPressed: () => readBlock()),
+              ElevatedButton(
+                  child: const Text("Read blocks"),
+                  onPressed: () => readMultipleBlocks()),
+              ElevatedButton(
+                  child: const Text("Write"),
+                  onPressed: () => showWriteDialog(false) //writeMailBoxMsg(),
+                  ),
+            ],
+          ),
+          const Text("Write protection"),
+          for (int i = 0; i < passwordControllers.length; i++)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    decoration: InputDecoration(label: Text("PWD ${i + 1}")),
+                    controller: passwordControllers[i],
+                    inputFormatters: [HexadecimalTextInputFormatter()],
+                  ),
+                ),
+                ElevatedButton(
+                    child: const Text("Present"),
+                    onPressed: () =>
+                        presentPassword(i, passwordControllers[i].text.trim()))
+              ],
+            ),
+          ElevatedButton(
+              child: const Text("Write NDEF"),
+              onPressed: () =>
+                  writeNDEF("Hello from flutter") //writeMailBoxMsg(),
+              ),
+          ElevatedButton(
+              child: const Text("Read NDEF"),
+              onPressed: () => readNDEF() //writeMailBoxMsg(),
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMailBox() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Container(
+          color: Colors.blue,
+          child: ListTile(
+            title: const Text(
+              "MAILBOX INFO",
+              style: TextStyle(color: Colors.white),
+            ),
+            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_downward,
+                  color: Colors.white,
+                ),
+                onPressed: () => getMailBoxInfo(),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.restore,
+                  color: Colors.white,
+                ),
+                onPressed: () => resetMailBox(),
+              ),
+            ]),
+          )),
+      Container(
+        padding: const EdgeInsets.all(8),
+        color: Colors.black12,
+        child: Text(mailBoxInfo.toString()),
+      ),
+    ]);
+  }
+
+  Widget _buildLogs() {
+    return Column(
+      children: [
+        Container(
+            height: 50,
+            color: Colors.blue,
+            child: ListTile(
+              //leading: Icon(Icons.code),
+              title: const Text(
+                "Logs",
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: IconButton(
+                onPressed: () => clearLogs(),
+                icon: const Icon(
+                  Icons.clear,
+                  color: Colors.white,
+                ),
+              ),
+            )),
+        Container(
+          color: Colors.black12,
+          height: 200,
+          child: ListView.builder(
+            itemCount: logs.length,
+            controller: _scrollController,
+            primary: false,
+            shrinkWrap: true,
+            itemBuilder: (_, int index) {
+              return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text(logs[index]), const Divider()]));
+            },
+          ),
+        )
+      ],
     );
   }
 }

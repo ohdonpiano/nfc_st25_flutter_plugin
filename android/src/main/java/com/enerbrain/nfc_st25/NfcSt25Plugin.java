@@ -69,6 +69,8 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
         READ_MEMORY_SIZE,
         READ_BLOCK,
         READ_BLOCKS,
+        PRESENT_PASSWORD,
+        WRITE_PASSWORD,
         READ_FAST_MEMORY,
         WRITE_MAIL_BOX,
         GET_INFO,
@@ -146,6 +148,12 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                 break;
             case "readBlocks":
                 executeAsynchronousAction(Action.READ_BLOCKS, result, call.arguments);
+                break;
+            case "presentPassword":
+                executeAsynchronousAction(Action.PRESENT_PASSWORD, result, call.arguments);
+                break;
+            case "writePassword":
+                executeAsynchronousAction(Action.WRITE_PASSWORD, result, call.arguments);
                 break;
             case "readMailbox":
                 executeAsynchronousAction(Action.READ_MAIL_BOX, result, null);
@@ -361,6 +369,7 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
     } */
 
         @Override
+        @SuppressWarnings("unchecked")
         protected ActionStatus doInBackground(Void... param) {
             ActionStatus result = null;
             // msgbox full
@@ -408,7 +417,6 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                     break;
 
                     case READ_BLOCKS: {
-                        @SuppressWarnings("unchecked")
                         Map<String, Object> args = (Map<String, Object>) requestData;
                         if (args.containsKey("address") && args.containsKey("blocks")) {
                             //noinspection DataFlowIssue
@@ -423,6 +431,32 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                             } else {
                                 result = ActionStatus.ACTION_FAILED;
                             }
+                        }
+                    }
+                    break;
+
+                    case PRESENT_PASSWORD: {
+                        Map<String, Object> args = (Map<String, Object>) requestData;
+                        if (args.containsKey("passwordNumber") && args.containsKey("password")) {
+                            //noinspection DataFlowIssue
+                            int passwordNumber = (int) args.get("passwordNumber");
+                            byte[] password = (byte[]) args.get("password");
+                            Log.i("nfc", "PRESENT PASSWORD number " + passwordNumber);
+                            lastTag.presentPassword(passwordNumber, password);
+                            result = ActionStatus.ACTION_SUCCESSFUL;
+                        }
+                    }
+                    break;
+
+                    case WRITE_PASSWORD: {
+                        Map<String, Object> args = (Map<String, Object>) requestData;
+                        if (args.containsKey("passwordNumber") && args.containsKey("password")) {
+                            //noinspection DataFlowIssue
+                            int passwordNumber = (int) args.get("passwordNumber");
+                            byte[] password = (byte[]) args.get("password");
+                            Log.i("nfc", "WRITE PASSWORD number " + passwordNumber);
+                            lastTag.writePassword(passwordNumber, password);
+                            result = ActionStatus.ACTION_SUCCESSFUL;
                         }
                     }
                     break;
@@ -513,7 +547,16 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                             Log.i("nfc", "READ BLOCKS " + blockData);
                             mResult.success(blockData);
                             break;
+                        case PRESENT_PASSWORD:
+                            Log.i("nfc", "PRESENT PASSWORD success");
+                            mResult.success(true);
+                            break;
+                        case WRITE_PASSWORD:
+                            Log.i("nfc", "WRITE PASSWORD success");
+                            mResult.success(true);
+                            break;
                         case RESET_MAIL_BOX:
+                            Log.i("nfc", "RESET MAILBOX success");
                             mResult.success("");
                             break;
                         case READ_MAIL_BOX:
@@ -563,8 +606,9 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                             break;
                         default:
                             // TODO HANDLE ERROR HERE!
-                            if (mResult != null)
+                            if (mResult != null) {
                                 mResult.error("ACTION_FAILED", resultStatus, null);
+                            }
                             break;
                     }
 
@@ -579,6 +623,14 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
 
                     break;
             }
+        }
+
+        private byte[] convertIntegerListToByteArray(List<Integer> list) {
+            byte[] byteArray = new byte[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                byteArray[i] = list.get(i).byteValue();
+            }
+            return byteArray;
         }
     }
 }

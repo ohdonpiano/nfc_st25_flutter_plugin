@@ -13,17 +13,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89de1355-eb63-4f10-85e9-c9a407b9c756" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/com/enerbrain/nfc_st25/NfcSt25Plugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/com/enerbrain/nfc_st25/NfcSt25Plugin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/test/widget_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/nfc_st25.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/nfc_st25.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/nfc_st25_tag.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/nfc_st25_tag.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,13 +38,16 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Flutter.example/lib/main.dart.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "master",
+    "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "show.migrate.to.gradle.popup": "false"
   }
@@ -69,7 +63,7 @@
       <recent name="$PROJECT_DIR$/android/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.Unnamed">
+  <component name="RunManager" selected="Flutter.example/lib/main.dart">
     <configuration name="Unnamed" type="AndroidRunConfigurationType" factoryName="Android App" nameIsGenerated="true">
       <module name="nfc_st25_example_android" />
       <option name="DEPLOY" value="true" />
@@ -182,81 +176,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="1088" y="530" key="#PSD" timestamp="1598619430093">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="1088" y="530" key="#PSD/0.23.3440.1359@0.23.3440.1359" timestamp="1598619430093" />
-    <state x="1506" y="390" key="#Unnamed" timestamp="1598619941437">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="1506" y="390" key="#Unnamed/0.23.3440.1359@0.23.3440.1359" timestamp="1598619941437" />
-    <state x="1828" y="364" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1603102781055">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="1828" y="364" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.3440.1359@0.23.3440.1359" timestamp="1603102781055" />
-    <state x="2101" y="499" key="#com.intellij.ide.util.TreeFileChooserDialog" timestamp="1598620011163">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="2101" y="499" key="#com.intellij.ide.util.TreeFileChooserDialog/0.23.3440.1359@0.23.3440.1359" timestamp="1598620011163" />
-    <state x="451" y="330" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1598454644364">
-      <screen x="0" y="23" width="1440" height="823" />
-    </state>
-    <state x="451" y="330" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.23.1440.823@0.23.1440.823" timestamp="1598454644364" />
-    <state x="547" y="340" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1603102446810">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="547" y="340" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.23.3440.1359@0.23.3440.1359" timestamp="1603102446810" />
-    <state x="2168" y="464" key="AndroidCreateResourceFileDialog" timestamp="1598613536703">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="2168" y="464" key="AndroidCreateResourceFileDialog/0.23.3440.1359@0.23.3440.1359" timestamp="1598613536703" />
-    <state width="1340" height="224" key="GridCell.Tab.0.bottom" timestamp="1599210760074">
-      <screen x="0" y="0" width="3440" height="1400" />
-    </state>
-    <state width="1340" height="224" key="GridCell.Tab.0.bottom/0.0.3440.1400@0.0.3440.1400" timestamp="1599210760074" />
-    <state width="1164" height="168" key="GridCell.Tab.0.bottom/0.23.1440.823@0.23.1440.823" timestamp="1598458880368" />
-    <state width="1774" height="314" key="GridCell.Tab.0.bottom/0.23.3440.1359@0.23.3440.1359" timestamp="1598620233851" />
-    <state width="1340" height="224" key="GridCell.Tab.0.center" timestamp="1599210760074">
-      <screen x="0" y="0" width="3440" height="1400" />
-    </state>
-    <state width="1340" height="224" key="GridCell.Tab.0.center/0.0.3440.1400@0.0.3440.1400" timestamp="1599210760074" />
-    <state width="1164" height="168" key="GridCell.Tab.0.center/0.23.1440.823@0.23.1440.823" timestamp="1598458880366" />
-    <state width="1774" height="314" key="GridCell.Tab.0.center/0.23.3440.1359@0.23.3440.1359" timestamp="1598620233850" />
-    <state width="1340" height="224" key="GridCell.Tab.0.left" timestamp="1599210760073">
-      <screen x="0" y="0" width="3440" height="1400" />
-    </state>
-    <state width="1340" height="224" key="GridCell.Tab.0.left/0.0.3440.1400@0.0.3440.1400" timestamp="1599210760073" />
-    <state width="1164" height="168" key="GridCell.Tab.0.left/0.23.1440.823@0.23.1440.823" timestamp="1598458880366" />
-    <state width="1774" height="314" key="GridCell.Tab.0.left/0.23.3440.1359@0.23.3440.1359" timestamp="1598620233849" />
-    <state width="1340" height="224" key="GridCell.Tab.0.right" timestamp="1599210760074">
-      <screen x="0" y="0" width="3440" height="1400" />
-    </state>
-    <state width="1340" height="224" key="GridCell.Tab.0.right/0.0.3440.1400@0.0.3440.1400" timestamp="1599210760074" />
-    <state width="1164" height="168" key="GridCell.Tab.0.right/0.23.1440.823@0.23.1440.823" timestamp="1598458880367" />
-    <state width="1774" height="314" key="GridCell.Tab.0.right/0.23.3440.1359@0.23.3440.1359" timestamp="1598620233851" />
-    <state x="1865" y="341" key="SettingsEditor" timestamp="1603102751541">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="1865" y="341" key="SettingsEditor/0.23.3440.1359@0.23.3440.1359" timestamp="1603102751541" />
-    <state x="932" y="425" key="com.intellij.ide.util.TipDialog" timestamp="1603102411666">
-      <screen x="0" y="23" width="3440" height="1359" />
-    </state>
-    <state x="932" y="414" key="com.intellij.ide.util.TipDialog/0.0.3440.1400@0.0.3440.1400" timestamp="1599210714224" />
-    <state x="390" y="266" key="com.intellij.ide.util.TipDialog/0.23.1440.821@0.23.1440.821" timestamp="1598859195720" />
-    <state x="390" y="267" key="com.intellij.ide.util.TipDialog/0.23.1440.824@0.23.1440.824" timestamp="1600963703080" />
-    <state x="932" y="425" key="com.intellij.ide.util.TipDialog/0.23.3440.1359@0.23.3440.1359" timestamp="1603102411666" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/android/build.gradle</url>
-          <line>14</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

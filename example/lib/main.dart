@@ -123,6 +123,17 @@ class ExamplePageState extends State<ExamplePage> {
     }
   }
 
+  Future<void> readMultipleBlocks() async {
+    const index = 0;
+    const blocks = 30;
+    try {
+      final data = await NfcSt25.readBlocks(index, blocks);
+      log("READ BLOCKS (${data.length}) : $data");
+    } catch (e) {
+      log("failed read blocks -> $e");
+    }
+  }
+
   Future<void> readMailBoxMsg() async {
     int cntError = 0;
     Uint8List msg = Uint8List.fromList([]);
@@ -284,7 +295,7 @@ class ExamplePageState extends State<ExamplePage> {
           children: [
             Text(lastTag?.name ?? ""),
             Text(lastTag?.uid ?? "",
-                style: const TextStyle(color: Colors.white, fontSize: 14.0))
+                style: const TextStyle(color: Colors.blue, fontSize: 14.0))
           ]),
       actions: [
         IconButton(
@@ -367,8 +378,8 @@ class ExamplePageState extends State<ExamplePage> {
                                         true) //writeMailBoxMsg(),
                                     ),
                                 ElevatedButton(
-                                    child: const Text("Read"),
-                                    onPressed: () => readBlock()),
+                                    child: const Text("Read blocks"),
+                                    onPressed: () => readMultipleBlocks()),
                                 ElevatedButton(
                                     child: const Text("Write"),
                                     onPressed: () => showWriteDialog(

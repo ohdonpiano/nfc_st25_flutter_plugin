@@ -42,6 +42,7 @@ import com.st.st25sdk.ndef.TextRecord;
 import com.st.st25sdk.ndef.UriRecord;
 import com.st.st25sdk.type5.st25dv.ST25DVTag;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,7 +239,6 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
 
         eventSuccess(map);
 
-
         executeAsynchronousAction(Action.GET_INFO,null);
 
       } catch (STException e) {
@@ -251,7 +251,6 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
             Log.i("nfc", "tag discovery failed or unsupported device");
         }
     }
-
 
     private Boolean nfcIsEnabled() {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(activity);
@@ -374,6 +373,7 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                         result = ActionStatus.ACTION_SUCCESSFUL;
                         break;
                     case WRITE_NDEF_MESSAGE:
+                        //noinspection ExtractMethodRecommender
                         String str = (String) requestData;
                         // Create a NDEFMsg
                         NDEFMsg ndefMsg = new NDEFMsg();
@@ -397,8 +397,13 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                     case READ_BLOCK: {
                         int address = (int) requestData;
                         Log.i("nfc", "READING BLOCK from address " + address + " for 1 block");
-                        blockData = lastTag.readSingleBlock(address);
-                        result = ActionStatus.ACTION_SUCCESSFUL;
+                        byte[] res = lastTag.readSingleBlock(address);
+                        if (res.length > 0 && res[0] == 0) {
+                            blockData = Arrays.copyOfRange(res, 1, res.length);
+                            result = ActionStatus.ACTION_SUCCESSFUL;
+                        } else {
+                            result = ActionStatus.ACTION_FAILED;
+                        }
                     }
                     break;
 
@@ -411,8 +416,13 @@ public class NfcSt25Plugin implements FlutterPlugin, MethodCallHandler, Activity
                             //noinspection DataFlowIssue
                             int blocks = (int) args.get("blocks");
                             Log.i("nfc", "READING BLOCKS from address " + address + " for " + blocks + " blocks");
-                            blockData = lastTag.readMultipleBlock(address, blocks);
-                            result = ActionStatus.ACTION_SUCCESSFUL;
+                            byte[] res = lastTag.readMultipleBlock(address, blocks);
+                            if (res.length > 0 && res[0] == 0) {
+                                blockData = Arrays.copyOfRange(res, 1, res.length);
+                                result = ActionStatus.ACTION_SUCCESSFUL;
+                            } else {
+                                result = ActionStatus.ACTION_FAILED;
+                            }
                         }
                     }
                     break;

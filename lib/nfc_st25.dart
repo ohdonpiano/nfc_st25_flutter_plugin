@@ -29,10 +29,18 @@ class NfcSt25 {
     return msg;
   }
 
-  static Future<Uint8List> readBlock(int index) async {
+  static Future<Uint8List> readBlock(int address) async {
     final Uint8List ris = await _channel
-        .invokeMethod('readBlock', index)
+        .invokeMethod('readBlock', address)
         .catchError((e) => throw (_mapException(e)));
+    return ris;
+  }
+
+  static Future<Uint8List> readBlocks(int address, int numBlocks) async {
+    final Uint8List ris = await _channel.invokeMethod('readBlocks', {
+      "address": address,
+      "blocks": numBlocks
+    }).catchError((e) => throw (_mapException(e)));
     return ris;
   }
 

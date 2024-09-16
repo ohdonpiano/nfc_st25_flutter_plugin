@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -5,13 +6,15 @@ import 'package:nfc_st25/nfc_st25.dart';
 import 'package:nfc_st25/utils/nfc_st25_tag.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: "Test",
       home: ExamplePage(),
     );
@@ -19,19 +22,20 @@ class MyApp extends StatelessWidget {
 }
 
 class ExamplePage extends StatefulWidget {
+  const ExamplePage({super.key});
+
   @override
-  _ExamplePage createState() => _ExamplePage();
+  ExamplePageState createState() => ExamplePageState();
 }
 
-class _ExamplePage extends State<ExamplePage> {
-  String _platformVersion = 'Unknown';
+class ExamplePageState extends State<ExamplePage> {
+  final _scrollController = ScrollController();
   bool nfcAvailability = false;
   St25Tag? lastTag;
   bool loading = false;
-  Uint8List? last_msg;
+  Uint8List? lastMsg;
   List<String> logs = [];
   MailBox? mailBoxInfo;
-  ScrollController _scrollController = new ScrollController();
 
   List<dynamic> commands = [
     [0, 1, 0],
@@ -53,15 +57,21 @@ class _ExamplePage extends State<ExamplePage> {
     startListen();
   }
 
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
   startListen() {
     _subscription = NfcSt25.startReading().listen((tag) {
-      log("[TAG FOUND] : " + tag.uid);
+      log("[TAG FOUND] : ${tag.uid}");
       //showSnackBar("Tag found " + tag.uid, false);
       setState(() {
         lastTag = tag;
         mailBoxInfo = tag.mailBox;
       });
-    }, onError: (e) => log("error on discovery tag -> " + e.toString()));
+    }, onError: (e) => log("error on discovery tag -> $e"));
   }
 
   clearLogs() {
@@ -73,25 +83,18 @@ class _ExamplePage extends State<ExamplePage> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       platformVersion = await NfcSt25.platformVersion;
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+    log("platform version: $platformVersion");
   }
 
   void log(String s) {
-    print(s);
+    if (kDebugMode) {
+      print(s);
+    }
     setState(() {
       logs.add(s);
     });
@@ -104,19 +107,19 @@ class _ExamplePage extends State<ExamplePage> {
 
       _scrollController.animateTo(
         scrollPosition.maxScrollExtent + 200,
-        duration: new Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         curve: Curves.easeOut,
       );
     }
   }
 
   Future<void> readBlock() async {
-    final index = 0;
+    const index = 0;
     try {
       final data = await NfcSt25.readBlock(index);
-      log("READ BLOCK (" + data.length.toString() + ") : " + data.toString());
+      log("READ BLOCK (${data.length}) : $data");
     } catch (e) {
-      log("failed read block index $index -> " + e.toString());
+      log("failed read block index $index -> $e");
     }
   }
 
@@ -125,22 +128,22 @@ class _ExamplePage extends State<ExamplePage> {
     Uint8List msg = Uint8List.fromList([]);
     while (cntError < 5) {
       try {
-        log("Read try #" + cntError.toString());
+        log("Read try #$cntError");
         if (cntError > 0) {
           await Future.delayed(const Duration(milliseconds: 200));
         }
         msg = await NfcSt25.readMailbox;
-        log("READ MSG (" + msg.length.toString() + ") : " + msg.toString());
+        log("READ MSG (${msg.length}) : $msg");
         setState(() {
-          last_msg = msg;
+          lastMsg = msg;
         });
       } catch (e) {
-        log("failed read  -> " + e.toString());
+        log("failed read  -> $e");
         cntError++;
       }
     }
     setState(() {
-      last_msg = msg;
+      lastMsg = msg;
     });
   }
 
@@ -149,7 +152,7 @@ class _ExamplePage extends State<ExamplePage> {
       await NfcSt25.resetMailBox();
       log("SUCCESSFUL RESET MAILBOX");
     } catch (e) {
-      log("Error reset mailbox" + e.toString());
+      log("Error reset mailbox $e");
       //showSnackBar("failed to reset mailbox -> " + e.toString(), true);
     }
   }
@@ -159,7 +162,7 @@ class _ExamplePage extends State<ExamplePage> {
     try {
       mailbox = await NfcSt25.getMailBoxInfo();
       //showSnackBar("SUCCESSFUL RESET MAILBOX", false);
-      log("GET MAILBOX INFO :\n" + mailbox.toString());
+      log("GET MAILBOX INFO :\n$mailbox");
       setState(() {
         mailBoxInfo = mailbox;
       });
@@ -167,7 +170,7 @@ class _ExamplePage extends State<ExamplePage> {
       setState(() {
         mailBoxInfo = null;
       });
-      log("failed get mailbox info ->" + e.toString());
+      log("failed get mailbox info -> $e");
       //showSnackBar("failed to reset mailbox -> " + e.toString(), true);
     }
   }
@@ -176,10 +179,10 @@ class _ExamplePage extends State<ExamplePage> {
     Uint8List msg = Uint8List.fromList(data);
     try {
       await NfcSt25.writeMailBoxByte(msg);
-      log("SUCCESS WRITE " + msg.toString());
+      log("SUCCESS WRITE $msg");
       return true;
     } catch (e) {
-      log("failed write -> " + e.toString());
+      log("failed write -> $e");
       return false;
     }
   }
@@ -188,14 +191,8 @@ class _ExamplePage extends State<ExamplePage> {
     bool success = await writeMailBoxMsg(data);
     if (success) {
       await readMailBoxMsg();
-      if (last_msg != null) {
-        showSnackBar(
-            'Send: ' +
-                data.toString() +
-                ' \n' +
-                'Received: ' +
-                last_msg!.toString(),
-            false);
+      if (lastMsg != null) {
+        showSnackBar('Send: $data \nReceived: ${lastMsg!}', false);
       }
     }
   }
@@ -203,9 +200,9 @@ class _ExamplePage extends State<ExamplePage> {
   Future<void> writeNDEF(String msg) async {
     try {
       await NfcSt25.writeNDEFString(msg);
-      log("SUCCESS WRTITE NDEF msg: " + msg);
+      log("SUCCESS WRTITE NDEF msg: $msg");
     } catch (e) {
-      log("failed write ndef -> " + e.toString());
+      log("failed write ndef -> $e");
       return;
     }
   }
@@ -213,10 +210,10 @@ class _ExamplePage extends State<ExamplePage> {
   Future<String?> readNDEF() async {
     try {
       String ris = await NfcSt25.readNDEF();
-      log("SUCCESS read NDEF msg:\n" + ris);
+      log("SUCCESS read NDEF msg:\n$ris");
       return ris;
     } catch (e) {
-      log("failed write ndef -> " + e.toString());
+      log("failed write ndef -> $e");
       return null;
     }
   }
@@ -238,7 +235,7 @@ class _ExamplePage extends State<ExamplePage> {
 
   Widget _tapCard() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: nfcAvailability
           ? Row(
               mainAxisSize: MainAxisSize.max,
@@ -248,8 +245,8 @@ class _ExamplePage extends State<ExamplePage> {
                       child: Card(
                           child: Container(
                               height: 300,
-                              padding: EdgeInsets.all(8),
-                              child: Stack(children: [
+                              padding: const EdgeInsets.all(8),
+                              child: const Stack(children: [
                                 Positioned(
                                     top: 0,
                                     left: 0,
@@ -269,15 +266,16 @@ class _ExamplePage extends State<ExamplePage> {
                                     ))
                               ]))))
                 ])
-          : Text("Nfc unavailable."),
+          : const Text("Nfc unavailable."),
     );
   }
 
   AppBar _myAppBar() {
-    if (lastTag == null)
+    if (lastTag == null) {
       return AppBar(
         title: const Text('ST25 nfc plugin example'),
       );
+    }
 
     return AppBar(
       title: Column(
@@ -286,10 +284,11 @@ class _ExamplePage extends State<ExamplePage> {
           children: [
             Text(lastTag?.name ?? ""),
             Text(lastTag?.uid ?? "",
-                style: TextStyle(color: Colors.white, fontSize: 14.0))
+                style: const TextStyle(color: Colors.white, fontSize: 14.0))
           ]),
       actions: [
-        IconButton(icon: Icon(Icons.cancel), onPressed: () => invalidateAll())
+        IconButton(
+            icon: const Icon(Icons.cancel), onPressed: () => invalidateAll())
       ],
     );
   }
@@ -310,7 +309,7 @@ class _ExamplePage extends State<ExamplePage> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text("Select command to send"),
+          title: const Text("Select command to send"),
           content: Column(
               mainAxisSize: MainAxisSize.min,
               children: commands
@@ -325,8 +324,8 @@ class _ExamplePage extends State<ExamplePage> {
                   .toList()),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
-            new TextButton(
-              child: new Text("Close"),
+            TextButton(
+              child: const Text("Close"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -350,40 +349,39 @@ class _ExamplePage extends State<ExamplePage> {
                   children: [
                     Container(
                       height: 300,
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text("Description: " + lastTag!.description),
-                          Text(
-                              "Memory size: " + lastTag!.memorySize.toString()),
-                          Text('Last mailbox msg read: ' + last_msg.toString()),
-                          SizedBox(height: 25),
+                          Text("Description: ${lastTag!.description}"),
+                          Text("Memory size: ${lastTag!.memorySize}"),
+                          Text('Last mailbox msg read: $lastMsg'),
+                          const SizedBox(height: 25),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 ElevatedButton(
-                                    child: Text("Write and read"),
+                                    child: const Text("Write and read"),
                                     onPressed: () => showWriteDialog(
                                         true) //writeMailBoxMsg(),
                                     ),
                                 ElevatedButton(
-                                    child: Text("Read"),
+                                    child: const Text("Read"),
                                     onPressed: () => readBlock()),
                                 ElevatedButton(
-                                    child: Text("Write"),
+                                    child: const Text("Write"),
                                     onPressed: () => showWriteDialog(
                                         false) //writeMailBoxMsg(),
                                     ),
                               ]),
                           ElevatedButton(
-                              child: Text("Write NDEF"),
+                              child: const Text("Write NDEF"),
                               onPressed: () => writeNDEF(
                                   "Hello from flutter") //writeMailBoxMsg(),
                               ),
                           ElevatedButton(
-                              child: Text("Read NDEF"),
+                              child: const Text("Read NDEF"),
                               onPressed: () => readNDEF() //writeMailBoxMsg(),
                               ),
                         ],
@@ -395,7 +393,7 @@ class _ExamplePage extends State<ExamplePage> {
                           Container(
                               color: Colors.blue,
                               child: ListTile(
-                                title: Text(
+                                title: const Text(
                                   "MILBOX INFO",
                                   style: TextStyle(color: Colors.white),
                                 ),
@@ -403,14 +401,14 @@ class _ExamplePage extends State<ExamplePage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                        icon: Icon(
+                                        icon: const Icon(
                                           Icons.arrow_downward,
                                           color: Colors.white,
                                         ),
                                         onPressed: () => getMailBoxInfo(),
                                       ),
                                       IconButton(
-                                        icon: Icon(
+                                        icon: const Icon(
                                           Icons.restore,
                                           color: Colors.white,
                                         ),
@@ -419,22 +417,22 @@ class _ExamplePage extends State<ExamplePage> {
                                     ]),
                               )),
                           Container(
-                            padding: EdgeInsets.all(8),
-                            child: Text(mailBoxInfo.toString()),
+                            padding: const EdgeInsets.all(8),
                             color: Colors.black12,
+                            child: Text(mailBoxInfo.toString()),
                           ),
                         ]),
                     Container(
                         color: Colors.blue,
                         child: ListTile(
                           //leading: Icon(Icons.code),
-                          title: Text(
+                          title: const Text(
                             "Logs",
                             style: TextStyle(color: Colors.white),
                           ),
                           trailing: IconButton(
                             onPressed: () => clearLogs(),
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.clear,
                               color: Colors.white,
                             ),
@@ -443,15 +441,19 @@ class _ExamplePage extends State<ExamplePage> {
                     Expanded(
                         child: Container(
                       color: Colors.black12,
-                      child: new ListView.builder(
+                      child: ListView.builder(
                         itemCount: logs.length,
                         controller: _scrollController,
                         itemBuilder: (BuildContext ctxt, int index) {
                           return Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [Text(logs[index]), Divider()]));
+                                  children: [
+                                    Text(logs[index]),
+                                    const Divider()
+                                  ]));
                         },
                       ),
                     ))

@@ -1,15 +1,6 @@
 import 'dart:async';
-import 'dart:collection';
-import 'dart:ffi';
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:nfc_st25/utils/nfc_st25_tag.dart';
-
-import 'utils/nfc_st25_tag.dart';
 import 'utils/exceptions.dart';
 
 class NfcSt25 {
@@ -17,7 +8,7 @@ class NfcSt25 {
 
   static const EventChannel _eventChannel = const EventChannel("nfc_st25/tags");
 
-  static Stream<dynamic> _tagStream;
+  static Stream<dynamic>? _tagStream;
 
   static Future<String> get platformVersion async {
     final String version = await _channel.invokeMethod('getPlatformVersion');
@@ -87,7 +78,7 @@ class NfcSt25 {
     // converted to their matching exception classes. The controller stream will
     // be closed if the errors are fatal.
     StreamController<St25Tag> controller = StreamController();
-    final stream = _tagStream;
+    final stream = _tagStream!;
     // Listen for tag reads.
     final subscription = stream.listen(
       (tag) => controller.add(tag),
@@ -104,7 +95,7 @@ class NfcSt25 {
       },
       onDone: () {
         _tagStream = null;
-        return controller.close();
+        controller.close();
       },
       // cancelOnError: false
       // cancelOnError cannot be used as the stream would cancel BEFORE the error
@@ -129,20 +120,20 @@ Exception _mapException(dynamic error) {
   if (error is PlatformException) {
     switch (error.code) {
       case "TAG_NOT_IN_THE_FIELD":
-        error = NfcTagNotInTheFieldException(error.message);
+        error = NfcTagNotInTheFieldException(error.message ?? "");
         break;
       case "UNABLE_TO_READ_MAILBOX":
-        error = NfcUnableReadMailBoxException(error.message);
+        error = NfcUnableReadMailBoxException(error.message ?? "");
         break;
       case "UNABLE_TO_GET_INFO":
-        error = NfcUnableGetInfoException(error.message);
+        error = NfcUnableGetInfoException(error.message ?? "");
         break;
       case "ACTION_FAILED":
-        error = NfcActionFailedException(error.message);
+        error = NfcActionFailedException(error.message ?? "");
         break;
 
       default:
-        error = NfcGeneralException(error.message);
+        error = NfcGeneralException(error.message ?? "");
     }
   }
   return error;

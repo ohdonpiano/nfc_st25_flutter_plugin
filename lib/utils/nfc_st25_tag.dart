@@ -6,38 +6,36 @@ import 'dart:convert';
 
 class St25Tag {
   St25Tag({
-    this.name,
-    this.description,
-    this.uid,
-    this.memorySize,
+    required this.name,
+    required this.description,
+    required this.uid,
+    this.memorySize = 0,
     this.mailBox,
   });
 
-  String name;
-  String description;
-  String uid;
+  String name, description, uid;
   int memorySize;
-  MailBox mailBox;
+  MailBox? mailBox;
 
   factory St25Tag.fromJson(String str) => St25Tag.fromMap(json.decode(str));
 
   String toJson() => json.encode(toMap());
 
   factory St25Tag.fromMap(Map<dynamic, dynamic> json) => St25Tag(
-        name: json["name"] == null ? null : json["name"],
-        description: json["description"] == null ? null : json["description"],
-        uid: json["uid"] == null ? null : json["uid"],
+        name: json["name"] ?? "",
+        description: json["description"] ?? "",
+        uid: json["uid"] ?? "",
         memorySize: json["memory_size"] == null ? null : json["memory_size"],
         mailBox:
             json["mail_box"] == null ? null : MailBox.fromMap(json["mail_box"]),
       );
 
   Map<String, dynamic> toMap() => {
-        "name": name == null ? null : name,
-        "description": description == null ? null : description,
-        "uid": uid == null ? null : uid,
-        "memory_size": memorySize == null ? null : memorySize,
-        "mail_box": mailBox == null ? null : mailBox.toMap(),
+        "name": name,
+        "description": description,
+        "uid": uid,
+        "memory_size": memorySize,
+        "mail_box": mailBox == null ? null : mailBox!.toMap(),
       };
 }
 
@@ -50,11 +48,11 @@ class MailBox {
     this.msgMissByNfc,
   });
 
-  bool mailboxEnabled;
-  bool msgPutByController;
-  bool msgPutByNfc;
-  bool msgMissByController;
-  bool msgMissByNfc;
+  bool? mailboxEnabled;
+  bool? msgPutByController;
+  bool? msgPutByNfc;
+  bool? msgMissByController;
+  bool? msgMissByNfc;
 
   @override
   String toString() {

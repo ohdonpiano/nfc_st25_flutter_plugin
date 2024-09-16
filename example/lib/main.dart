@@ -1,9 +1,5 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:nfc_st25/nfc_st25.dart';
 import 'package:nfc_st25/utils/nfc_st25_tag.dart';
@@ -30,11 +26,11 @@ class ExamplePage extends StatefulWidget {
 class _ExamplePage extends State<ExamplePage> {
   String _platformVersion = 'Unknown';
   bool nfcAvailability = false;
-  St25Tag lastTag;
+  St25Tag? lastTag;
   bool loading = false;
-  Uint8List last_msg;
+  Uint8List? last_msg;
   List<String> logs = [];
-  MailBox mailBoxInfo;
+  MailBox? mailBoxInfo;
   ScrollController _scrollController = new ScrollController();
 
   List<dynamic> commands = [
@@ -43,10 +39,7 @@ class _ExamplePage extends State<ExamplePage> {
     [0, 1, 2],
   ];
 
-  StreamSubscription<St25Tag> _subscription;
-
-  // needed for snackbar
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  StreamSubscription<St25Tag>? _subscription;
 
   @override
   void initState() {
@@ -117,9 +110,9 @@ class _ExamplePage extends State<ExamplePage> {
     }
   }
 
-  Future<Uint8List> readMailBoxMsg() async {
+  Future<void> readMailBoxMsg() async {
     int cntError = 0;
-    Uint8List msg;
+    Uint8List msg = Uint8List.fromList([]);
     while (cntError < 5) {
       try {
         log("Read try #" + cntError.toString());
@@ -131,9 +124,6 @@ class _ExamplePage extends State<ExamplePage> {
         setState(() {
           last_msg = msg;
         });
-
-        return msg;
-        break;
       } catch (e) {
         log("failed read  -> " + e.toString());
         cntError++;
@@ -142,7 +132,6 @@ class _ExamplePage extends State<ExamplePage> {
     setState(() {
       last_msg = msg;
     });
-    return null;
   }
 
   Future<void> resetMailBox() async {
@@ -186,18 +175,16 @@ class _ExamplePage extends State<ExamplePage> {
   }
 
   Future<void> writeAndRead(List<int> data) async {
-    Uint8List msg;
     bool success = await writeMailBoxMsg(data);
-
     if (success) {
-      msg = await readMailBoxMsg();
-      if (msg != null) {
-        setState(() {
-          last_msg = msg;
-        });
-
-        this.showSnackBar(
-            'Send: ' + data.toString() + ' \n' + 'Received: ' + msg.toString(),
+      await readMailBoxMsg();
+      if (last_msg != null) {
+        showSnackBar(
+            'Send: ' +
+                data.toString() +
+                ' \n' +
+                'Received: ' +
+                last_msg!.toString(),
             false);
       }
     }
@@ -213,7 +200,7 @@ class _ExamplePage extends State<ExamplePage> {
     }
   }
 
-  Future<String> readNDEF() async {
+  Future<String?> readNDEF() async {
     try {
       String ris = await NfcSt25.readNDEF();
       log("SUCCESS read NDEF msg:\n" + ris);
@@ -236,7 +223,7 @@ class _ExamplePage extends State<ExamplePage> {
       ),
     );
 
-    _scaffoldKey.currentState.showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Widget _tapCard() {
@@ -276,7 +263,7 @@ class _ExamplePage extends State<ExamplePage> {
     );
   }
 
-  Widget _myAppBar() {
+  AppBar _myAppBar() {
     if (lastTag == null)
       return AppBar(
         title: const Text('ST25 nfc plugin example'),
@@ -287,8 +274,8 @@ class _ExamplePage extends State<ExamplePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(lastTag.name),
-            Text(lastTag.uid,
+            Text(lastTag?.name ?? ""),
+            Text(lastTag?.uid ?? "",
                 style: TextStyle(color: Colors.white, fontSize: 14.0))
           ]),
       actions: [
@@ -317,7 +304,7 @@ class _ExamplePage extends State<ExamplePage> {
           content: Column(
               mainAxisSize: MainAxisSize.min,
               children: commands
-                  .map((e) => RaisedButton(
+                  .map((e) => ElevatedButton(
                         onPressed: () {
                           //writeMailBoxMsg(e);
                           read ? writeAndRead(e) : writeMailBoxMsg(e);
@@ -328,7 +315,7 @@ class _ExamplePage extends State<ExamplePage> {
                   .toList()),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
-            new FlatButton(
+            new TextButton(
               child: new Text("Close"),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -344,7 +331,6 @@ class _ExamplePage extends State<ExamplePage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        key: _scaffoldKey,
         appBar: _myAppBar(),
         body: lastTag == null
             ? _tapCard()
@@ -359,33 +345,34 @@ class _ExamplePage extends State<ExamplePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text("Description: " + lastTag.description),
-                          Text("Memory size: " + lastTag.memorySize.toString()),
+                          Text("Description: " + lastTag!.description),
+                          Text(
+                              "Memory size: " + lastTag!.memorySize.toString()),
                           Text('Last mailbox msg read: ' + last_msg.toString()),
                           SizedBox(height: 25),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                RaisedButton(
+                                ElevatedButton(
                                     child: Text("Write and read"),
                                     onPressed: () => showWriteDialog(
                                         true) //writeMailBoxMsg(),
                                     ),
-                                RaisedButton(
+                                ElevatedButton(
                                     child: Text("Read"),
                                     onPressed: () => readMailBoxMsg()),
-                                RaisedButton(
+                                ElevatedButton(
                                     child: Text("Write"),
                                     onPressed: () => showWriteDialog(
                                         false) //writeMailBoxMsg(),
                                     ),
                               ]),
-                          RaisedButton(
+                          ElevatedButton(
                               child: Text("Write NDEF"),
                               onPressed: () => writeNDEF(
                                   "Hello from flutter") //writeMailBoxMsg(),
                               ),
-                          RaisedButton(
+                          ElevatedButton(
                               child: Text("Read NDEF"),
                               onPressed: () => readNDEF() //writeMailBoxMsg(),
                               ),
